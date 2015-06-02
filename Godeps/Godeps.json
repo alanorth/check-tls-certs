@@ -1,0 +1,15 @@
+{
+	"ImportPath": "staging-tomoca",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/certifi/gocertifi",
+			"Rev": "183c1180012e4d5a0d0f7d96a624a37d9418a997"
+		},
+		{
+			"ImportPath": "github.com/keighl/mandrill",
+			"Comment": "1.0.0-1-g13577f0",
+			"Rev": "13577f03b340bee9d780cc008663d19075dde2aa"
+		}
+	]
+}
