@@ -164,8 +164,6 @@ func processHosts() {
 	//send email notifications to admins
 	if certMessages != "" {
 		fmt.Println(certMessages)
-		//sendAuthEmail(certMessages)
-		//sendMail(certMessages)
 
 		email_details := &emailDetails{}
 		email_details.subject = "Heroku app - check certificate details"
