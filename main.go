@@ -281,6 +281,18 @@ func getOSEnv() (string, string, string, []string) {
 func sendMail(mail_details *emailDetails) {
 	api_key, email_src_addr, email_src_name, email_dest_addr := getOSEnv()
 
+	//validate os env vars. fail otherwise!
+	if api_key == "" {
+		log.Println("OS env variable 'MANDRILL_KEY' is not defined!")
+		os.Exit(2)
+	} else if len(email_dest_addr) <= 0 {
+		log.Println("OS env variable 'EMAIL_DEST_ADDR' is not defined!")
+		os.Exit(2)
+	} else if email_src_addr == "" {
+		log.Println("OS env variable 'EMAIL_SRC_ADDR' is not defined!")
+		os.Exit(2)
+	}
+
 	client := mandrill.ClientWithKey(api_key)
 
 	message := &mandrill.Message{}
