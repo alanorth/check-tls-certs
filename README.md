@@ -1,9 +1,8 @@
 ## Golang Check TLS Certificates
 
-This is a simple utility written in Go to check SSL certificates for a list of hosts. Each certificate in the host's certificate chain is checked for the following:
+This Heroku Golang app is a fork of [Ryan Rogers' go-check-certs](https://github.com/timewasted/go-check-certs) which checks the expiry dates and signature algorithms of an SSL certificate for a given host.
+Warning messages are displayed if a certificate expires in less than 30 days and also if the signature algorithm has already been [sunset](http://googleonlinesecurity.blogspot.com/2014/09/gradually-sunsetting-sha-1.html).
 
-* Expiration date. By default, you will be warned if a certificate will expire within 30 days. This can be adjusted with `-years=X`, `-months=X`, and/or `-days=X`.
-* Signature algorithm. Some algorithms have already been sunset, others are in the process of being sunset. This can be spammy, so you can disable the check with `-check-sig-alg=false`.
 
 Usage looks something like:
 
