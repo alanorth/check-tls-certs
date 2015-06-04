@@ -31,6 +31,22 @@ $ go run main.go -hosts=hosts -years=1 -months=3 -days=2
 ```
 
 
+### Deploying to heroku
+- clone the repo & create a golang app on heroku:
+
+        git clone https://github.com/ilri/rmg-check-tls-certs.git
+        heroku apps:create <APP-NAME> --buildpack https://github.com/kr/heroku-buildpack-go.git
+
+- Specify `EMAIL_DEST_ADDR`, `EMAIL_SRC_ADDR` & `MANDRILL_KEY` environment variables under _Config Variables_ in the application's Setting page on heroku dashboard.
+- Specify the app's name in the `Procfile`
+
+        worker: <APP-NAME> -hosts=hosts <OTHER-OPTIONS>
+- push to deploy
+
+        git push heroku master
+
+
+
 ### License
 ```
 Copyright (c) 2013, Ryan Rogers
