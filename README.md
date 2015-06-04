@@ -1,5 +1,4 @@
-go-check-certs
-==============
+## Golang Check TLS Certificates
 
 This is a simple utility written in Go to check SSL certificates for a list of hosts. Each certificate in the host's certificate chain is checked for the following:
 
@@ -14,14 +13,7 @@ Usage looks something like:
 
 The hosts file is simply a single `hostname:port` per line. Empty lines or lines that start with `#` are ignored.
 
-Current limitations:
---------------------
-
-* This uses the host's root CA set to check the validity of certificates.  This means that it is not able to validate things like self-signed certificates.
-* A certificate must be valid for it to be checked.
-
-License:
---------
+### License
 ```
 Copyright (c) 2013, Ryan Rogers
 All rights reserved.
