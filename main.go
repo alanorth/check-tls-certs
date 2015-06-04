@@ -30,6 +30,13 @@ type emailDetails struct {
 	mail_html string
 }
 
+type envVariables struct {
+	api_key         string
+	email_src_addr  string
+	email_src_name  string
+	email_dest_addr []string
+}
+
 const (
 	errExpiringShortly = "%s: ** '%s' (S/N %X) expires in %d hours! **"
 	errExpiringSoon    = "%s: '%s' (S/N %X) expires in roughly %d days."
@@ -115,7 +122,7 @@ func main() {
 
 	//worker: run once a day
 	for {
-		fmt.Println("worker up!...checking ssl certs")
+		log.Println("worker up!...checking ssl certs")
 		processHosts()
 		log.Println("worker done...going away for", SLEEP_DURATION, "hours")
 		time.Sleep(SLEEP_DURATION * time.Hour)
@@ -151,11 +158,9 @@ func processHosts() {
 			certMessages += getCurrentTime() + ": " + r.host + " " + r.err.Error() + "\n"
 			continue
 		}
+		// get cert details
 		for _, cert := range r.certs {
 			for _, err := range cert.errs {
-				//log.Println(err)
-
-				// get cert details
 				certMessages += getCurrentTime() + ": " + err.Error() + "\n"
 			}
 		}
@@ -169,6 +174,8 @@ func processHosts() {
 		email_details.subject = "Heroku app - check certificate details"
 		email_details.mail_text = certMessages
 		sendMail(email_details)
+	} else {
+		log.Printf("no certifcate(s) are/is expiring in %d years, %d months, %d days", *warnYears, *warnMonths, *warnDays)
 	}
 }
 
@@ -268,37 +275,38 @@ func checkHost(host string) (result hostResult) {
 }
 
 //get mandrill api key & mail parameters from shell env.
-func getOSEnv() (string, string, string, []string) {
-	api_key := os.Getenv("MANDRILL_KEY")
-	email_src_addr := os.Getenv("EMAIL_SRC_ADDR")
-	email_src_name := os.Getenv("EMAIL_SRC_NAME")
-	email_dest_addr := strings.Split(os.Getenv("EMAIL_DEST_ADDR"), " ")
+func getOSEnv() envVariables {
+	os_env_vars := &envVariables{}
+	os_env_vars.api_key = os.Getenv("MANDRILL_KEY")
+	os_env_vars.email_src_addr = os.Getenv("EMAIL_SRC_ADDR")
+	os_env_vars.email_src_name = os.Getenv("EMAIL_SRC_NAME")
+	os_env_vars.email_dest_addr = strings.Split(os.Getenv("EMAIL_DEST_ADDR"), " ")
 
-	return api_key, email_src_addr, email_src_name, email_dest_addr
+	return *os_env_vars
 }
 
 // send mail notification to admin(s)
 func sendMail(mail_details *emailDetails) {
-	api_key, email_src_addr, email_src_name, email_dest_addr := getOSEnv()
+	os_env_vars := getOSEnv()
 
 	//validate os env vars. fail otherwise!
-	if api_key == "" {
+	if os_env_vars.api_key == "" {
 		log.Println("OS env variable 'MANDRILL_KEY' is not defined!")
 		os.Exit(2)
-	} else if len(email_dest_addr) <= 0 {
+	} else if len(os_env_vars.email_dest_addr) <= 0 {
 		log.Println("OS env variable 'EMAIL_DEST_ADDR' is not defined!")
 		os.Exit(2)
-	} else if email_src_addr == "" {
+	} else if os_env_vars.email_src_addr == "" {
 		log.Println("OS env variable 'EMAIL_SRC_ADDR' is not defined!")
 		os.Exit(2)
 	}
 
-	client := mandrill.ClientWithKey(api_key)
+	client := mandrill.ClientWithKey(os_env_vars.api_key)
 
 	message := &mandrill.Message{}
-	message.FromEmail = email_src_addr
-	message.FromName = email_src_name
-	for _, recipient := range email_dest_addr {
+	message.FromEmail = os_env_vars.email_src_addr
+	message.FromName = os_env_vars.email_src_name
+	for _, recipient := range os_env_vars.email_dest_addr {
 		message.AddRecipient(recipient, "", "to")
 	}
 	message.Subject = mail_details.subject
@@ -312,7 +320,7 @@ func sendMail(mail_details *emailDetails) {
 
 	//show error details if mail(s) not sent
 	if err != nil {
-		fmt.Println("sending mailllll" + err.Error())
+		fmt.Println("Unable to send mail(s)" + err.Error())
 		for _, response := range responses {
 			log.Printf("Unable to send mail to %s. Reason: %s", response.Email, response.RejectionReason)
 		}
